@@ -10,10 +10,12 @@ boxes = cross(rows, cols)
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
+diagonal_units_1 = [rows[i]+cols[i] for i in range(0, 9)]
+diagonal_units_2 = [rows[i]+cols[-i-1] for i in range(0, 9)]
 unitlist = row_units + column_units + square_units
+unitlist += [diagonal_units_1, diagonal_units_2]
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
-
 
 # # ???
 # assignments = []
@@ -105,7 +107,6 @@ def naked_twins(values):
             # If we find the same char combination
                 # Remove each of 2 chars from every other box in same unit
     boxes_with_two_chars = [box for box in values if len(values[box]) == 2]
-    # print('boxes_with_two_chars', boxes_with_two_chars)
     for box in boxes_with_two_chars:
         value_to_look_for = values[box]
         for unit in units[box]:
@@ -168,13 +169,7 @@ def solve(grid):
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
     initial_state = grid_values(grid)
-    values = eliminate(initial_state)
-    # values = only_choice(initial_state)
-    print('Initial state:\n')
-    display(initial_state)
-    print('\n')
-    values = naked_twins(values)
-    return values
+    return search(initial_state)
 
 
 if __name__ == '__main__':
@@ -186,7 +181,9 @@ if __name__ == '__main__':
     # display(solve(diag_sudoku_grid))
     # display(search(grid_values(simple_grid_1)))
     print('After naked values:\n')
-    display(solve(grid_step_11))
+    result = solve(diag_sudoku_grid)
+    display(result)
+    assignments = result.copy()
 
     # try:
     #     from visualize import visualize_assignments

@@ -15,32 +15,19 @@ units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
 
 
-# ???
-assignments = []
+# # ???
+# assignments = []
 
 
-def assign_value(values, box, value):
-    """
-    Please use this function to update your values dictionary!
-    Assigns a value to a given box. If it updates the board record it.
-    """
-    values[box] = value
-    if len(value) == 1:
-        assignments.append(values.copy())
-    return values
-
-
-def naked_twins(values):
-    """Eliminate values using the naked twins strategy.
-    Args:
-        values(dict): a dictionary of the form {'box_name': '123456789', ...}
-
-    Returns:
-        the values dictionary with the naked twins eliminated from peers.
-    """
-
-    # Find all instances of naked twins
-    # Eliminate the naked twins as possibilities for their peers
+# def assign_value(values, box, value):
+#     """
+#     Please use this function to update your values dictionary!
+#     Assigns a value to a given box. If it updates the board record it.
+#     """
+#     values[box] = value
+#     if len(value) == 1:
+#         assignments.append(values.copy())
+#     return values
 
 
 def grid_values(grid):
@@ -106,6 +93,30 @@ def only_choice(values):
     return values
 
 
+def naked_twins(values):
+    """Eliminate values using the naked twins strategy.
+    Args:
+        values(dict): a dictionary of the form {'box_name': '123456789', ...}
+    Returns:
+        the values dictionary with the naked twins eliminated from peers.
+    """
+    # For every box with 2 chars
+        # Look into each unit (the box belongs to)
+            # If we find the same char combination
+                # Remove each of 2 chars from every other box in same unit
+    boxes_with_two_chars = [box for box in values if len(values[box]) == 2]
+    # print('boxes_with_two_chars', boxes_with_two_chars)
+    for box in boxes_with_two_chars:
+        value_to_look_for = values[box]
+        for unit in units[box]:
+            for twin in [x for x in unit if (x != box and values[x] == value_to_look_for)]:
+                # print('naked twins found:', box, twin, value_to_look_for)
+                for effected_box in [x for x in unit if (x != box and x != twin)]:
+                    before = values[effected_box]
+                    for c in value_to_look_for:
+                        values[effected_box] = values[effected_box].replace(c, '')
+    return values
+
 def reduce_puzzle(values):
     """
     Iterate eliminate() and only_choice(). If at some point, there is a box with no available values, return False.
@@ -120,6 +131,7 @@ def reduce_puzzle(values):
         solved_values_before = len([box for box in values.keys() if len(values[box]) == 1])
         values = eliminate(values)
         values = only_choice(values)
+        values = naked_twins(values)
         solved_values_after = len([box for box in values.keys() if len(values[box]) == 1])
         stalled = solved_values_before == solved_values_after
         if len([box for box in values.keys() if len(values[box]) == 0]):
@@ -155,14 +167,26 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
+    initial_state = grid_values(grid)
+    values = eliminate(initial_state)
+    # values = only_choice(initial_state)
+    print('Initial state:\n')
+    display(initial_state)
+    print('\n')
+    values = naked_twins(values)
+    return values
+
 
 if __name__ == '__main__':
     simple_grid_1 = '..3.2.6..9..3.5..1..18.64....81.29..7.......8..67.82....26.95..8..2.3..9..5.1.3..'
     simple_grid_2 = '4.....8.5.3..........7......2.....6.....8.4......1.......6.3.7.5..2.....1.4......'
+    grid_step_11 = '1.4.9..68956.18.34..84.695151.....868..6...1264..8..97781923645495.6.823.6.854179'
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
 
     # display(solve(diag_sudoku_grid))
-    display(search(grid_values(simple_grid_1)))
+    # display(search(grid_values(simple_grid_1)))
+    print('After naked values:\n')
+    display(solve(grid_step_11))
 
     # try:
     #     from visualize import visualize_assignments

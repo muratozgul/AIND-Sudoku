@@ -13,23 +13,10 @@ square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','45
 diagonal_units_1 = [rows[i]+cols[i] for i in range(0, 9)]
 diagonal_units_2 = [rows[i]+cols[-i-1] for i in range(0, 9)]
 unitlist = row_units + column_units + square_units
+# add the new units (main diagonals) to the list of all units
 unitlist += [diagonal_units_1, diagonal_units_2]
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
-
-# # ???
-# assignments = []
-
-
-# def assign_value(values, box, value):
-#     """
-#     Please use this function to update your values dictionary!
-#     Assigns a value to a given box. If it updates the board record it.
-#     """
-#     values[box] = value
-#     if len(value) == 1:
-#         assignments.append(values.copy())
-#     return values
 
 
 def grid_values(grid):
@@ -111,7 +98,6 @@ def naked_twins(values):
         value_to_look_for = values[box]
         for unit in units[box]:
             for twin in [x for x in unit if (x != box and values[x] == value_to_look_for)]:
-                # print('naked twins found:', box, twin, value_to_look_for)
                 for effected_box in [x for x in unit if (x != box and x != twin)]:
                     before = values[effected_box]
                     for c in value_to_look_for:
@@ -178,18 +164,15 @@ if __name__ == '__main__':
     grid_step_11 = '1.4.9..68956.18.34..84.695151.....868..6...1264..8..97781923645495.6.823.6.854179'
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
 
-    # display(solve(diag_sudoku_grid))
-    # display(search(grid_values(simple_grid_1)))
-    print('After naked values:\n')
     result = solve(diag_sudoku_grid)
     display(result)
     assignments = result.copy()
 
-    # try:
-    #     from visualize import visualize_assignments
-    #     visualize_assignments(assignments)
-    #
-    # except SystemExit:
-    #     pass
-    # except:
-    #     print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
+    try:
+        from visualize import visualize_assignments
+        visualize_assignments(assignments)
+
+    except SystemExit:
+        pass
+    except:
+        print('We could not visualize your board due to a pygame issue. Not a problem! It is not a requirement.')
